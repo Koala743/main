@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Platoboost Full Flow</title>
+  <title>Platoboost: Enlace + Verificación</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -84,7 +84,7 @@
 
   <script>
     const service = 1951;
-    const identifier = "web-user"; // usa el mismo para generar y verificar
+    const identifier = "web-user"; // mismo identifier
     const hostname = "https://api.platoboost.com";
     const robloxLink = "https://www.roblox.com/share?code=51ae788294f8fc41b8311f0cdc842ae7&type=Server";
 
@@ -129,8 +129,13 @@
         const data = await res.json();
 
         if (data.success && data.data.valid === true) {
-          document.getElementById("result").innerHTML = `<span class="success">✅ Key válida. Enlace copiado.</span>`;
+          document.getElementById("result").innerHTML = `<span class="success">✅ Key válida. Abriendo Roblox...</span>`;
+
+          // Copiar al portapapeles
           await navigator.clipboard.writeText(robloxLink);
+
+          // Abrir automáticamente el enlace
+          window.open(robloxLink, "_blank");
         } else {
           document.getElementById("result").innerHTML = `<span class="error">❌ Key inválida o expirada.</span>`;
         }
