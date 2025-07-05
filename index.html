@@ -2,102 +2,139 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Platoboost: Enlace + Verificación</title>
+  <title>Platoboost UI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
+    :root {
+      --primary: #00c6ff;
+      --secondary: #0072ff;
+      --accent: #00ff95;
+      --error: #ff6b6b;
+      --success: #7CFC00;
+      --bg-dark: #121212;
+      --text-light: #f2f2f2;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
+      background: linear-gradient(135deg, #1f1c2c, #928dab);
+      color: var(--text-light);
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
-      color: white;
-      text-align: center;
-      padding: 50px 20px;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
     }
 
     h1 {
-      font-size: 2em;
-      margin-bottom: 20px;
+      font-size: 2.2em;
+      margin-bottom: 30px;
+      text-align: center;
+      text-shadow: 1px 1px 5px #000;
     }
 
-    button, input {
-      padding: 14px 20px;
-      font-size: 16px;
-      border-radius: 8px;
-      border: none;
-      margin-top: 10px;
-    }
-
-    button {
-      background: #28a745;
-      color: white;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #218838;
+    .container {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 30px;
+      border-radius: 15px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 0 25px rgba(0,0,0,0.4);
     }
 
     input {
-      width: 300px;
-      max-width: 90%;
-      text-align: center;
+      width: 100%;
+      padding: 14px 18px;
+      margin-top: 15px;
+      font-size: 1em;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      transition: 0.3s;
+      background: rgba(255,255,255,0.1);
+      color: white;
     }
 
-    #linkSection, #verifySection {
-      margin-top: 30px;
+    input:focus {
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      font-size: 1em;
+      margin-top: 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      color: white;
+      font-weight: bold;
+      transition: transform 0.2s ease, background 0.4s;
+    }
+
+    button:hover {
+      transform: scale(1.03);
+      background: linear-gradient(to right, var(--accent), var(--secondary));
+    }
+
+    #boostLink {
+      display: block;
+      margin-top: 15px;
+      word-break: break-word;
+      color: var(--accent);
+      text-decoration: none;
     }
 
     #status, #result {
-      margin-top: 15px;
-      font-style: italic;
-    }
-
-    a {
-      color: #aaffff;
-      word-break: break-all;
-      display: block;
-      margin-top: 10px;
+      margin-top: 20px;
+      font-size: 0.95em;
+      text-align: center;
     }
 
     .success {
-      color: #90ee90;
+      color: var(--success);
     }
 
     .error {
-      color: #ffb3b3;
+      color: var(--error);
     }
   </style>
 </head>
 <body>
-  <h1>🔗 Platoboost Generator + Verifier</h1>
 
-  <div id="linkSection">
-    <button onclick="generateLink()">✨ Generar enlace de boost</button>
+  <h1>🔐 Platoboost Key System</h1>
+
+  <div class="container">
+    <button onclick="generateLink()">✨ Generar Enlace Boost</button>
     <a id="boostLink" href="#" target="_blank"></a>
     <div id="status"></div>
-  </div>
 
-  <div id="verifySection">
-    <input type="text" id="keyInput" placeholder="Pega aquí tu key..." />
-    <br />
+    <input type="text" id="keyInput" placeholder="🔑 Pega aquí tu key" />
     <button onclick="verifyKey()">✅ Verificar Key</button>
     <div id="result">Resultado: -</div>
   </div>
 
   <script>
     const service = 1951;
-    const identifier = "web-user"; // mismo identifier
+    const identifier = "web-user"; // debe coincidir en ambos
     const hostname = "https://api.platoboost.com";
     const robloxLink = "https://www.roblox.com/share?code=51ae788294f8fc41b8311f0cdc842ae7&type=Server";
 
     async function generateLink() {
-      document.getElementById("status").textContent = "Generando enlace...";
+      document.getElementById("status").textContent = "⏳ Generando enlace...";
       document.getElementById("boostLink").textContent = "";
 
       try {
         const res = await fetch(`${hostname}/public/start`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ service, identifier })
         });
 
@@ -105,13 +142,13 @@
         if (data.success) {
           const link = data.data.url;
           document.getElementById("boostLink").href = link;
-          document.getElementById("boostLink").textContent = link;
-          document.getElementById("status").textContent = "✅ Enlace generado. Ábrelo para conseguir la key.";
+          document.getElementById("boostLink").textContent = "👉 Ir al boost";
+          document.getElementById("status").innerHTML = `<span class="success">✅ Enlace generado correctamente</span>`;
         } else {
-          document.getElementById("status").textContent = "❌ Error: " + data.message;
+          document.getElementById("status").innerHTML = `<span class="error">❌ ${data.message}</span>`;
         }
       } catch (err) {
-        document.getElementById("status").textContent = "⚠️ Error de red o CORS.";
+        document.getElementById("status").innerHTML = `<span class="error">🚫 Error: ${err.message}</span>`;
       }
     }
 
@@ -119,7 +156,7 @@
       const key = document.getElementById("keyInput").value.trim();
       if (!key) return alert("Ingresa una key primero");
 
-      document.getElementById("result").textContent = "Verificando...";
+      document.getElementById("result").textContent = "🔎 Verificando...";
       const nonce = Date.now().toString();
 
       const url = `${hostname}/public/whitelist/${service}?identifier=${identifier}&key=${encodeURIComponent(key)}&nonce=${nonce}`;
@@ -130,11 +167,7 @@
 
         if (data.success && data.data.valid === true) {
           document.getElementById("result").innerHTML = `<span class="success">✅ Key válida. Abriendo Roblox...</span>`;
-
-          // Copiar al portapapeles
           await navigator.clipboard.writeText(robloxLink);
-
-          // Abrir automáticamente el enlace
           window.open(robloxLink, "_blank");
         } else {
           document.getElementById("result").innerHTML = `<span class="error">❌ Key inválida o expirada.</span>`;
