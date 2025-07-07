@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>Platoboost UI</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     :root {
       --primary: #00c6ff;
@@ -11,131 +12,133 @@
       --accent: #00ff95;
       --error: #ff6b6b;
       --success: #7CFC00;
-      --bg-dark: #121212;
+      --bg-dark: #0e0e1a;
       --text-light: #f2f2f2;
+      --glass: rgba(255, 255, 255, 0.06);
     }
-
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
-
     body {
-      background: linear-gradient(135deg, #1f1c2c, #928dab);
+      background: radial-gradient(circle at top left, #1f1c2c, #928dab);
+      font-family: 'Poppins', sans-serif;
       color: var(--text-light);
-      font-family: 'Segoe UI', sans-serif;
-      padding: 30px;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
       min-height: 100vh;
+      padding: 20px;
     }
-
-    h1 {
-      font-size: 2.2em;
-      margin-bottom: 30px;
+    .card {
+      backdrop-filter: blur(15px);
+      background: var(--glass);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+      padding: 40px;
+      max-width: 440px;
+      width: 100%;
       text-align: center;
-      text-shadow: 1px 1px 5px #000;
+      animation: fadeIn 0.5s ease;
     }
-
-    .container {
-      background: rgba(0, 0, 0, 0.3);
-      padding: 30px;
-      border-radius: 15px;
-      width: 100%;
-      max-width: 480px;
-      box-shadow: 0 0 25px rgba(0,0,0,0.4);
-    }
-
-    input {
-      width: 100%;
-      padding: 14px 18px;
-      margin-top: 15px;
-      font-size: 1em;
-      border-radius: 8px;
-      border: none;
-      outline: none;
-      transition: 0.3s;
-      background: rgba(255,255,255,0.1);
-      color: white;
-    }
-
-    input:focus {
-      box-shadow: 0 0 10px var(--accent);
-    }
-
-    button {
-      width: 100%;
-      padding: 14px;
-      font-size: 1em;
-      margin-top: 20px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      background: linear-gradient(to right, var(--primary), var(--secondary));
-      color: white;
+    .logo {
+      font-size: 1.8em;
       font-weight: bold;
-      transition: transform 0.2s ease, background 0.4s;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 25px;
+      letter-spacing: 1px;
+      text-shadow: 0 0 10px #000;
     }
-
+    input, button {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: none;
+      margin-top: 20px;
+      font-size: 1em;
+      font-weight: 600;
+      transition: 0.3s ease;
+    }
+    input {
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      outline: none;
+    }
+    input:focus {
+      box-shadow: 0 0 8px var(--accent);
+    }
+    button {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #fff;
+      cursor: pointer;
+    }
     button:hover {
       transform: scale(1.03);
-      background: linear-gradient(to right, var(--accent), var(--secondary));
+      background: linear-gradient(135deg, var(--accent), var(--secondary));
     }
-
     #boostLink {
       display: block;
       margin-top: 15px;
-      word-break: break-word;
       color: var(--accent);
-      text-decoration: none;
-    }
-
-    #status, #result {
-      margin-top: 20px;
       font-size: 0.95em;
-      text-align: center;
+      word-break: break-word;
     }
-
+    #status, #result {
+      margin-top: 18px;
+      font-size: 0.95em;
+    }
     .success {
       color: var(--success);
     }
-
     .error {
       color: var(--error);
+    }
+    #countdown {
+      margin-top: 10px;
+      font-size: 0.9em;
+      color: #ccc;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(25px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
-
-  <h1>🔐 Platoboost Key System</h1>
-
-  <div class="container">
+  <div class="card">
+    <div class="logo">🚀 PLATOBOOST</div>
     <button onclick="generateLink()">✨ Generar Enlace Boost</button>
     <a id="boostLink" href="#" target="_blank"></a>
     <div id="status"></div>
-
-    <input type="text" id="keyInput" placeholder="🔑 Pega aquí tu key" />
+    <div id="countdown"></div>
+    <input type="text" id="keyInput" placeholder="🔑 Pega tu key aquí" />
     <button onclick="verifyKey()">✅ Verificar Key</button>
     <div id="result">Resultado: -</div>
   </div>
-
   <script>
     const service = 1951;
-    const identifier = "web-user"; // debe coincidir en ambos
     const hostname = "https://api.platoboost.com";
-    const robloxLink = "https://www.roblox.com/share?code=6d574324d901ff42929c2f6c7a0d99b5&type=Server";
+    const robloxLink = "https://www.roblox.com/share?code=704267bf4aba6543928cee54dc1bb928&type=Server";
+    let currentIdentifier = null;
 
     async function generateLink() {
       document.getElementById("status").textContent = "⏳ Generando enlace...";
       document.getElementById("boostLink").textContent = "";
+      document.getElementById("boostLink").href = "#";
+      document.getElementById("countdown").textContent = "";
+
+      currentIdentifier = crypto.randomUUID();
 
       try {
-        const res = await fetch(`${hostname}/public/start`, {
+        const timestamp = Date.now();
+        const res = await fetch(`${hostname}/public/start?t=${timestamp}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ service, identifier })
+          body: JSON.stringify({ service, identifier: currentIdentifier })
         });
 
         const data = await res.json();
@@ -144,22 +147,51 @@
           document.getElementById("boostLink").href = link;
           document.getElementById("boostLink").textContent = "👉 Ir al boost";
           document.getElementById("status").innerHTML = `<span class="success">✅ Enlace generado correctamente</span>`;
+
+          let seconds = 600;
+          updateCountdown(seconds);
+          const timer = setInterval(() => {
+            seconds--;
+            updateCountdown(seconds);
+            if (seconds <= 0) {
+              clearInterval(timer);
+              document.getElementById("boostLink").textContent = "";
+              document.getElementById("boostLink").href = "#";
+              document.getElementById("status").textContent = "";
+              document.getElementById("countdown").textContent = "";
+              currentIdentifier = null;
+            }
+          }, 1000);
         } else {
           document.getElementById("status").innerHTML = `<span class="error">❌ ${data.message}</span>`;
+          currentIdentifier = null;
         }
       } catch (err) {
         document.getElementById("status").innerHTML = `<span class="error">🚫 Error: ${err.message}</span>`;
+        currentIdentifier = null;
       }
     }
 
+    function updateCountdown(seconds) {
+      const min = Math.floor(seconds / 60);
+      const sec = seconds % 60;
+      document.getElementById("countdown").textContent =
+        `⏳ Este enlace expira en ${min}m ${sec < 10 ? "0" : ""}${sec}s`;
+    }
+
     async function verifyKey() {
+      if (!currentIdentifier) {
+        alert("Primero genera un enlace para obtener un identificador válido");
+        return;
+      }
+
       const key = document.getElementById("keyInput").value.trim();
       if (!key) return alert("Ingresa una key primero");
 
       document.getElementById("result").textContent = "🔎 Verificando...";
       const nonce = Date.now().toString();
 
-      const url = `${hostname}/public/whitelist/${service}?identifier=${identifier}&key=${encodeURIComponent(key)}&nonce=${nonce}`;
+      const url = `${hostname}/public/whitelist/${service}?identifier=${currentIdentifier}&key=${encodeURIComponent(key)}&nonce=${nonce}`;
 
       try {
         const res = await fetch(url);
@@ -167,7 +199,6 @@
 
         if (data.success && data.data.valid === true) {
           document.getElementById("result").innerHTML = `<span class="success">✅ Key válida. Abriendo Roblox...</span>`;
-          await navigator.clipboard.writeText(robloxLink);
           window.open(robloxLink, "_blank");
         } else {
           document.getElementById("result").innerHTML = `<span class="error">❌ Key inválida o expirada.</span>`;
