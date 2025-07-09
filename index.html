@@ -38,7 +38,7 @@
       border-radius: 20px;
       box-shadow: 0 8px 30px rgba(0,0,0,0.3);
       padding: 40px;
-      max-width: 440px;
+      max-width: 460px;
       width: 100%;
       text-align: center;
       animation: fadeIn 0.5s ease;
@@ -102,6 +102,35 @@
       font-size: 0.9em;
       color: #ccc;
     }
+    #robloxBox {
+      margin-top: 25px;
+      padding: 20px;
+      background: rgba(0, 255, 149, 0.07);
+      border: 1px solid var(--accent);
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 255, 149, 0.3);
+      display: none;
+    }
+    #robloxBox p {
+      font-size: 0.9em;
+      word-break: break-word;
+      margin-bottom: 10px;
+    }
+    #robloxBox a {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 10px 20px;
+      background: linear-gradient(135deg, var(--accent), var(--secondary));
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 8px;
+      transition: 0.2s ease;
+    }
+    #robloxBox a:hover {
+      transform: scale(1.05);
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+    }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(25px); }
       to { opacity: 1; transform: translateY(0); }
@@ -118,11 +147,16 @@
     <input type="text" id="keyInput" placeholder="🔑 Pega tu key aquí" />
     <button onclick="verifyKey()">✅ Verificar Key</button>
     <div id="result">Resultado: -</div>
+    <div id="robloxBox">
+      <p>🎮 Link de acceso al servidor:</p>
+      <p id="robloxText"></p>
+      <a id="robloxGo" href="#" target="_blank">🔗 Abrir en Roblox</a>
+    </div>
   </div>
   <script>
     const service = 1951;
     const hostname = "https://api.platoboost.com";
-    const robloxLink = "https://www.roblox.com/share?code=704267bf4aba6543928cee54dc1bb928&type=Server";
+    const robloxLink = "https://www.roblox.com/share?code=f8cdd8844a281f4d87c8a591b5d3126a&type=Server";
     let currentIdentifier = null;
 
     async function generateLink() {
@@ -130,6 +164,7 @@
       document.getElementById("boostLink").textContent = "";
       document.getElementById("boostLink").href = "#";
       document.getElementById("countdown").textContent = "";
+      document.getElementById("robloxBox").style.display = "none";
 
       currentIdentifier = crypto.randomUUID();
 
@@ -189,6 +224,7 @@
       if (!key) return alert("Ingresa una key primero");
 
       document.getElementById("result").textContent = "🔎 Verificando...";
+      document.getElementById("robloxBox").style.display = "none";
       const nonce = Date.now().toString();
 
       const url = `${hostname}/public/whitelist/${service}?identifier=${currentIdentifier}&key=${encodeURIComponent(key)}&nonce=${nonce}`;
@@ -198,8 +234,10 @@
         const data = await res.json();
 
         if (data.success && data.data.valid === true) {
-          document.getElementById("result").innerHTML = `<span class="success">✅ Key válida. Abriendo Roblox...</span>`;
-          window.open(robloxLink, "_blank");
+          document.getElementById("result").innerHTML = `<span class="success">✅ Key válida</span>`;
+          document.getElementById("robloxText").textContent = robloxLink;
+          document.getElementById("robloxGo").href = robloxLink;
+          document.getElementById("robloxBox").style.display = "block";
         } else {
           document.getElementById("result").innerHTML = `<span class="error">❌ Key inválida o expirada.</span>`;
         }
