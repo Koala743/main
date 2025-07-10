@@ -102,34 +102,25 @@
       font-size: 0.9em;
       color: #ccc;
     }
-    #robloxBox {
-      margin-top: 25px;
-      padding: 20px;
-      background: rgba(0, 255, 149, 0.07);
-      border: 1px solid var(--accent);
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(0, 255, 149, 0.3);
+    #robloxButton {
       display: none;
-    }
-    #robloxBox p {
-      font-size: 0.9em;
-      word-break: break-word;
-      margin-bottom: 10px;
-    }
-    #robloxBox a {
-      display: inline-block;
-      margin-top: 8px;
-      padding: 10px 20px;
+      margin-top: 25px;
+      padding: 12px 24px;
       background: linear-gradient(135deg, var(--accent), var(--secondary));
       color: #fff;
-      text-decoration: none;
+      font-size: 1em;
       font-weight: bold;
-      border-radius: 8px;
-      transition: 0.2s ease;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: 0.3s ease;
     }
-    #robloxBox a:hover {
+    #robloxButton:hover {
       transform: scale(1.05);
       background: linear-gradient(135deg, var(--primary), var(--accent));
+    }
+    #toggleBypass {
+      margin-top: 20px;
+      background: linear-gradient(135deg, #ffcb52, #ff8753);
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(25px); }
@@ -140,31 +131,68 @@
 <body>
   <div class="card">
     <div class="logo">🚀 PLATOBOOST</div>
-    <button onclick="generateLink()">✨ Generar Enlace Boost</button>
+    <button id="generateBtn" onclick="generateLink()">✨ Generar Enlace Boost</button>
+    <button id="toggleBypass" style="display:none" onclick="enableKeySystem()">🔧 Elegir si sacar Key</button>
     <a id="boostLink" href="#" target="_blank"></a>
     <div id="status"></div>
     <div id="countdown"></div>
     <input type="text" id="keyInput" placeholder="🔑 Pega tu key aquí" />
     <button onclick="verifyKey()">✅ Verificar Key</button>
     <div id="result">Resultado: -</div>
-    <div id="robloxBox">
-      <p>🎮 Link de acceso al servidor:</p>
-      <p id="robloxText"></p>
-      <a id="robloxGo" href="#" target="_blank">🔗 Abrir en Roblox</a>
-    </div>
+    <a id="robloxButton" href="#" target="_blank">🎮 Entrar al servidor Roblox</a>
   </div>
   <script>
     const service = 1951;
     const hostname = "https://api.platoboost.com";
-    const robloxLink = "https://www.roblox.com/share?code=f8cdd8844a281f4d87c8a591b5d3126a&type=Server";
+    const robloxWebLink = "https://www.roblox.com/share?code=2df7098e533c444d9892f040499a375c&type=Server";
+    const specialDeviceIds = [
+      "b759cf68ab97d688e787688081451845c391677ea4f76359bf3758857f21d9d9",
+      "076309f421c45c32e976907768385f163fe86abee18fa15c4fecb1eaafa6e737"
+    ];
     let currentIdentifier = null;
+    let deviceId = "";
+
+    async function generateDeviceId() {
+      const info = [
+        navigator.userAgent,
+        navigator.language,
+        screen.width,
+        screen.height,
+        screen.colorDepth,
+        navigator.hardwareConcurrency,
+        navigator.deviceMemory,
+        Intl.DateTimeFormat().resolvedOptions().timeZone
+      ].join('|');
+
+      const hashBuffer = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(info));
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      return hashHex;
+    }
+
+    window.onload = async () => {
+      deviceId = await generateDeviceId();
+
+      if (specialDeviceIds.includes(deviceId)) {
+        document.getElementById("generateBtn").style.display = "none";
+        document.getElementById("toggleBypass").style.display = "block";
+        document.getElementById("robloxButton").href = robloxWebLink;
+        document.getElementById("robloxButton").style.display = "inline-block";
+      }
+    };
+
+    function enableKeySystem() {
+      document.getElementById("toggleBypass").style.display = "none";
+      document.getElementById("generateBtn").style.display = "block";
+      document.getElementById("robloxButton").style.display = "none";
+    }
 
     async function generateLink() {
       document.getElementById("status").textContent = "⏳ Generando enlace...";
       document.getElementById("boostLink").textContent = "";
       document.getElementById("boostLink").href = "#";
       document.getElementById("countdown").textContent = "";
-      document.getElementById("robloxBox").style.display = "none";
+      document.getElementById("robloxButton").style.display = "none";
 
       currentIdentifier = crypto.randomUUID();
 
@@ -224,9 +252,9 @@
       if (!key) return alert("Ingresa una key primero");
 
       document.getElementById("result").textContent = "🔎 Verificando...";
-      document.getElementById("robloxBox").style.display = "none";
-      const nonce = Date.now().toString();
+      document.getElementById("robloxButton").style.display = "none";
 
+      const nonce = Date.now().toString();
       const url = `${hostname}/public/whitelist/${service}?identifier=${currentIdentifier}&key=${encodeURIComponent(key)}&nonce=${nonce}`;
 
       try {
@@ -235,9 +263,8 @@
 
         if (data.success && data.data.valid === true) {
           document.getElementById("result").innerHTML = `<span class="success">✅ Key válida</span>`;
-          document.getElementById("robloxText").textContent = robloxLink;
-          document.getElementById("robloxGo").href = robloxLink;
-          document.getElementById("robloxBox").style.display = "block";
+          document.getElementById("robloxButton").href = robloxWebLink;
+          document.getElementById("robloxButton").style.display = "inline-block";
         } else {
           document.getElementById("result").innerHTML = `<span class="error">❌ Key inválida o expirada.</span>`;
         }
