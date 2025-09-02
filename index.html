@@ -9,7 +9,7 @@
     :root {
       --primary: #00c6ff;
       --secondary: #0072ff;
-      --accent: #00d478; /* verde menos brilloso */
+      --accent: #00d478;
       --error: #ff4d6d;
       --success: #7CFC00;
       --bg1: #0f0c29;
@@ -201,9 +201,42 @@
     .vip-name {
       font-weight: 600;
     }
+
+    /* Botón de dueño en esquina */
+    .owner-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, var(--accent), var(--primary));
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.5em;
+      color: white;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .owner-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(0, 196, 255, 0.4);
+    }
+    .owner-btn:active {
+      transform: scale(0.95);
+    }
   </style>
 </head>
 <body>
+  <!-- Botón de dueño en esquina superior derecha -->
+  <button class="owner-btn" onclick="activateOwnerMode()" title="Acceso de Dueño">
+    👑
+  </button>
+
   <!-- Partículas decorativas -->
   <div class="particles">
     <div class="particle" style="width:10px; height:10px; top:20%; left:30%;"></div>
@@ -227,33 +260,105 @@
     <!-- Lista de juegos VIP -->
     <div id="vipList">
       <div class="vip-item" onclick="openVIP('dragon')">
-        <img src="https://cdn.discordapp.com/attachments/1399055361197211721/1408186920596541530/IMG-20250818-WA0011.jpg?ex=68a8d3c4&is=68a78244&hm=2a4c25053f5e757b8b0a884fdee21b9a21973abc7064258cb7baee537c808e29&" alt="Dragon Blox">
+        <img src="https://tr.rbxcdn.com/180DAY-fe0912a1eaa40da3470766f150bdec69/500/280/Image/Jpeg/noFilter" alt="Dragon Blox">
         <span class="vip-name">🐉 Dragon Blox Ultimate</span>
       </div>
       <div class="vip-item" onclick="openVIP('terror')">
         <img src="URL_IMAGEN_TERROR" alt="Juego Terror">
         <span class="vip-name">👹 Juego de Terror (Roblox)</span>
       </div>
-      <!-- 👉 Para agregar más juegos copia este bloque:
-      <div class="vip-item" onclick="openVIP('otro')">
-        <img src="URL_IMAGEN" alt="Otro">
-        <span class="vip-name">🎮 Nombre del Juego</span>
-      </div>
-      Y añade el link en el objeto vipLinks abajo -->
     </div>
   </div>
 
   <script>
     const service = 1951;
-    const hostname = "https://api.platoboost.com";
+    const hosts = ["https://api.platoboost.com", "https://api.platoboost.net"];
     let currentIdentifier = null;
     let linkOpened = false;
+    let currentHost = null;
+    
+    const ownerConfig = {
+      password: "admin123VIP"
+    };
 
     const vipLinks = {
       dragon: "https://www.roblox.com/share?code=12b587975fb3ba46bcafa5c0806fd9db&type=Server",
       terror: "https://www.roblox.com/share?code=AQUI_EL_LINK_DEL_TERROR&type=Server"
-      // 👉 Para agregar más juegos:  otro: "LINK_DEL_SERVER"
     };
+
+    function isOwner() {
+      const savedPassword = localStorage.getItem('ownerPassword');
+      return savedPassword === ownerConfig.password;
+    }
+
+    function activateOwnerMode() {
+      if (isOwner()) {
+        showOwnerPanel();
+        return;
+      }
+      
+      const password = prompt("🔐 Ingresa la clave de administrador:");
+      if (password === ownerConfig.password) {
+        localStorage.setItem('ownerPassword', password);
+        alert("✅ Acceso de administrador activado!");
+        showOwnerPanel();
+      } else if (password !== null) {
+        alert("❌ Clave incorrecta");
+      }
+    }
+
+    function showOwnerPanel() {
+      document.getElementById("generateBtn").style.display = "none";
+      document.getElementById("boostLink").style.display = "none";
+      document.getElementById("fallbackLink").style.display = "none";
+      document.querySelector("input").style.display = "none";
+      document.querySelector("button[onclick='verifyKey()']").style.display = "none";
+      
+      document.getElementById("status").innerHTML = `<span class="success">👑 Panel de Administrador</span>`;
+      document.getElementById("result").innerHTML = `<span class="success">Acceso VIP Completo</span>`;
+      document.getElementById("vipList").style.display = "block";
+      
+      document.querySelector('.owner-btn').style.display = 'none';
+      
+      const logoutBtn = document.createElement("button");
+      logoutBtn.textContent = "🚪 Cerrar Sesión Admin";
+      logoutBtn.onclick = () => {
+        localStorage.removeItem('ownerPassword');
+        location.reload();
+      };
+      logoutBtn.style.marginTop = "15px";
+      document.querySelector(".card").appendChild(logoutBtn);
+    }
+
+    window.addEventListener('load', () => {
+      if (isOwner()) {
+        showOwnerPanel();
+      }
+    });
+
+    async function tryWithHosts(path, options) {
+      let lastError = null;
+      
+      for (let i = 0; i < hosts.length; i++) {
+        const hostname = hosts[i];
+        try {
+          console.log(`Intentando con host ${i + 1}: ${hostname}`);
+          const response = await fetch(`${hostname}${path}`, options);
+          
+          if (response.ok) {
+            currentHost = hostname;
+            return response;
+          } else {
+            lastError = new Error(`Host ${hostname} respondió con status ${response.status}`);
+          }
+        } catch (error) {
+          console.log(`Error con ${hostname}:`, error.message);
+          lastError = error;
+        }
+      }
+      
+      throw lastError || new Error("Todos los hosts fallaron");
+    }
 
     async function generateLink() {
       document.getElementById("status").innerHTML = '<span class="loader"></span> Generando enlace...';
@@ -265,13 +370,13 @@
 
       try {
         const timestamp = Date.now();
-        const res = await fetch(`${hostname}/public/start?t=${timestamp}`, {
+        const response = await tryWithHosts(`/public/start?t=${timestamp}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ service, identifier: currentIdentifier })
         });
 
-        const data = await res.json();
+        const data = await response.json();
         if (data.success) {
           const link = data.data.url;
           let popup = window.open(link, "_blank");
@@ -328,15 +433,32 @@
 
       document.getElementById("result").innerHTML = '<span class="loader"></span> Verificando...';
       const nonce = Date.now().toString();
-      const url = `${hostname}/public/whitelist/${service}?identifier=${currentIdentifier}&key=${encodeURIComponent(key)}&nonce=${nonce}`;
+      const path = `/public/whitelist/${service}?identifier=${currentIdentifier}&key=${encodeURIComponent(key)}&nonce=${nonce}`;
 
       try {
-        const res = await fetch(url);
-        const data = await res.json();
+        if (currentHost) {
+          try {
+            const response = await fetch(`${currentHost}${path}`);
+            const data = await response.json();
+            
+            if (data.success && data.data.valid === true) {
+              document.getElementById("result").innerHTML = `<span class="success">✅ Key válida</span>`;
+              document.getElementById("vipList").style.display = "block";
+            } else {
+              document.getElementById("result").innerHTML = `<span class="error">❌ Key inválida o expirada.</span>`;
+            }
+            return;
+          } catch (error) {
+            console.log(`Error con host guardado ${currentHost}, intentando con todos...`);
+          }
+        }
+
+        const response = await tryWithHosts(path, { method: "GET" });
+        const data = await response.json();
 
         if (data.success && data.data.valid === true) {
           document.getElementById("result").innerHTML = `<span class="success">✅ Key válida</span>`;
-          document.getElementById("vipList").style.display = "block"; // 👉 muestra lista de juegos
+          document.getElementById("vipList").style.display = "block";
         } else {
           document.getElementById("result").innerHTML = `<span class="error">❌ Key inválida o expirada.</span>`;
         }
